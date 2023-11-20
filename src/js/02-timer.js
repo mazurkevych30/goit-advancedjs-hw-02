@@ -4,8 +4,8 @@ import "flatpickr/dist/flatpickr.min.css"
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css"
 
-const date = new Date();
-let ms;
+let date = new Date();
+let pickDate;
 
 iziToast.settings({
     timeout: 1000,
@@ -20,7 +20,7 @@ minuteIncrement: 1,
     onClose(selectedDates) {
         if (selectedDates[0] > date) {
             elements.btnStart.disabled = false;
-            ms = selectedDates[0] - date;
+            pickDate = selectedDates[0];
         }
         else {
             elements.btnStart.disabled = true;
@@ -48,18 +48,20 @@ elements.btnStart.addEventListener("click", handlerDate)
 flatpickr(elements.dateInput, options);
 
 function handlerDate() {
+    let ms;
     elements.btnStart.disabled = true;
     elements.dateInput.disabled = true;
     const timerId = setInterval(() => {
-        ms -= 1000;
-
-        if (ms<0) {
+        date = new Date();
+        ms = pickDate - date;
+       if (ms<0) {
             clearInterval(timerId);
             return;
         }
 
         const convertDate = convertMs(ms);
         markup(convertDate)
+       
 
     }, 1000)
 }
