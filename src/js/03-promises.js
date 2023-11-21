@@ -19,48 +19,39 @@ form[3].addEventListener("click", onClick)
 function onClick(evt) {
   evt.preventDefault();
 
-  let delayStart = Number(form[0].value);
+  let delay = Number(form[0].value);
   const step = Number(form[1].value);
   const amount = Number(form[2].value);
-  const promises = [];
+  form.reset();
 
   for (let i = 1; i <= amount; i += 1){
      if (i > 1) {
-      delayStart += step;
+      delay += step;
     }
-    promises.push(createPromise(i, delayStart))
-  }
-  
-  Promise.allSettled(promises)
-    .then((items) => {
-      items.forEach((item) => {
-        let delayPromise = item.value ? item.value.delay : item.reason.delay;
-        setTimeout(() => {
-          if (item.status === "fulfilled") {
-            iziToast.success({
-              message: `✅ Fulfilled promise ${item.value.position} in ${delayPromise}ms`,
+    createPromise(i, delay)
+      .then(({position, delay}) => {
+        iziToast.success({
+              message: `✅ Fulfilled promise ${position} in ${delay}ms`,
             });
-          } else {
-            iziToast.error({
-              message: `❌ Rejected promise ${item.reason.position} in ${delayPromise}ms`,
-            });
-          }
-        }, delayPromise);
       })
+      .catch(({position, delay}) => {
+      iziToast.error({
+              message: `❌ Rejected promise ${position} in ${delay}ms`,
+            });
     })
-    .catch((err) => {
-    console.log(err);
-  })
+  }
 }
 
 
 function createPromise(position, delay) {
   return new Promise((resolve, reject) => {
-    const shouldResolve = Math.random() > 0.3;
-  if (shouldResolve) {
-    resolve({position, delay})
-  } else {
-    reject({position, delay})
-  }
+    setTimeout(() => {
+      const shouldResolve = Math.random() > 0.3;
+      if (shouldResolve) {
+        resolve({position, delay})
+      } else {
+        reject({position, delay})
+      }
+    }, delay);
   })
 }
